@@ -1,11 +1,17 @@
 package com.cookoo.opengl.shader;
 
-import android.opengl.GLES20;
+import android.content.res.Resources;
+import android.opengl.GLES30;
+import android.opengl.GLES30;
 import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ShaderUtils {
 
     private static final String TAG = ShaderUtils.class.getName();
+    private static final int GL_ERROR = 0;
 
     private ShaderUtils(){
         throw new IllegalArgumentException("ShaderUtils ,This class does not allow creation of objects, illegal operations");
@@ -38,50 +44,100 @@ public class ShaderUtils {
             "   gl_PointSize = u_Color;\n"+
             "}";
 
-    public static int compileVertexShader(String shaderCode){
-        return compileShader(GLES20.GL_VERTEX_SHADER,shaderCode);
+    public static int loadVertexShader(String shaderCode){
+        return loadShader(GLES30.GL_VERTEX_SHADER,shaderCode);
     }
 
-    public static int compileFragmentShader(String shaderCode){
-        return compileShader(GLES20.GL_FRAGMENT_SHADER,shaderCode);
+    public static int loadFragmentShader(String shaderCode){
+        return loadShader(GLES30.GL_FRAGMENT_SHADER,shaderCode);
     }
 
-    private static int compileShader(int type, String shaderCode) {
+    private static int loadShader(int type, String shaderCode) {
         //1.创建一个新的着色器对象
-        final int shaderObjectId = GLES20.glCreateShader(type);
+        final int shaderObjectId = GLES30.glCreateShader(type);
         //2.获取创建状态
-        if(shaderObjectId == GLES20.GL_NO_ERROR){
+        if(shaderObjectId == GL_ERROR){
             //在openGL中，都是通过整形值去作为openGL对象的引用。之后进行操作的时候都是将这个整型值传回给openGL进行操作。
             //返回值0代表着创建对象失败。
-            Log.w(TAG, "Could not create new shader.");
-            return GLES20.GL_NO_ERROR;
+            Log.e(TAG, "Could not create new shader. type: " + type);
+            return GL_ERROR;
         }
 
         //3.将着色器代码上传到着色器对象中
-        GLES20.glShaderSource(shaderObjectId,shaderCode);
+        GLES30.glShaderSource(shaderObjectId,shaderCode);
 
         //4.编译着色器对象
-        GLES20.glCompileShader(shaderObjectId);
+        GLES30.glCompileShader(shaderObjectId);
 
         //5.获取编译状态：opengl将想要获取的值放入长度为1的数组的首位
         final int[] compileStatus = new int[1];
-        GLES20.glGetShaderiv(shaderObjectId,GLES20.GL_COMPILE_STATUS,compileStatus,0);
+        GLES30.glGetShaderiv(shaderObjectId,GLES30.GL_COMPILE_STATUS,compileStatus,0);
 
         // 打印编译的着色器信息
         Log.v(TAG, "Results of compiling source:" + "\n" + shaderCode + "\n:"
-                + GLES20.glGetShaderInfoLog(shaderObjectId));
+                + GLES30.glGetShaderInfoLog(shaderObjectId));
 
         //6.验证编译状态
-        if(compileStatus[0] == GLES20.GL_NO_ERROR){
+        if(compileStatus[0] == GL_ERROR){
             //如果编译失败，则删除创建的着色器对象
-            GLES20.glDeleteShader(shaderObjectId);
-            Log.w(TAG, "Compilation of shader failed.");
+            GLES30.glDeleteShader(shaderObjectId);
+            Log.e(TAG, "Compilation of shader failed. type: " + type);
             //7.返回着色器对象：失败，为0
-            return GLES20.GL_NO_ERROR;
+            return GL_ERROR;
         }
         //7.返回着色器对象：成功，非0
         return shaderObjectId;
     }
 
-//    public static
+    public static int createProgram(String vertexSource, String fragmentSource){
+        final int vertexShader = loadVertexShader(vertexSource);
+        if(vertexShader == GL_ERROR){
+            Log.e(TAG, "load vertex shader failed! ");
+            return GL_ERROR;
+        }
+        final int fragmentShader = loadFragmentShader(fragmentSource);
+        if(fragmentShader == GL_ERROR){
+            Log.e(TAG, "load fragment shader failed! ");
+            return GL_ERROR;
+        }
+
+        final int program = GLES30.glCreateProgram();
+        if (program == GL_ERROR){
+            Log.e(TAG, "create program failed! ");
+            return GL_ERROR;
+        }
+
+        GLES30.glAttachShader(program,vertexShader);
+        GLES30.glAttachShader(program,fragmentShader);
+
+        GLES30.glDeleteShader(vertexShader);
+        GLES30.glDeleteShader(fragmentShader);
+
+        GLES30.glLinkProgram(program);
+        final int[] linkStatus = new int[1];
+        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0);
+        if (linkStatus[0] == GL_ERROR) { // link failed
+            Log.e(TAG, "Error link program: ");
+            Log.e(TAG, GLES30.glGetProgramInfoLog(program));
+            GLES30.glDeleteProgram(program); // delete program
+            return GL_ERROR;
+        }
+        return program;
+    }
+
+    public static String loadFromAssets(String fileName, Resources resources) {
+        String result = null;
+        try {
+            InputStream is = resources.getAssets().open(fileName);
+            int length = is.available();
+            byte[] data = new byte[length];
+            is.read(data);
+            is.close();
+            result = new String(data, "UTF-8");
+            result.replace("\\r\\n", "\\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
