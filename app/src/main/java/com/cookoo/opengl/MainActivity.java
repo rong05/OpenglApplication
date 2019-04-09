@@ -32,4 +32,17 @@ public class MainActivity extends Activity {
         ConfigurationInfo info = am.getDeviceConfigurationInfo();
         return (info.reqGlEsVersion >= 0x30000);
     }
+
+    @Override
+    protected void onPause() {
+        mGlSurfaceView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mGlSurfaceView.onResume();
+        super.onResume();
+    }
+
 }

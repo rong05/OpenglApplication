@@ -7,11 +7,9 @@ import android.util.Log;
 
 import com.cookoo.opengl.shader.ShaderUtils;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -54,23 +52,22 @@ public class TestRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         final int vertexCount = 3;
-        final int[] vertexs = {
-                0,1,0,
-                -1,-1,0,
-                1,-1,0
+        final float[] vertexs = {
+                0.0f,0.5f,0.0f,
+                -0.5f,-0.5f,0.0f,
+                0.5f,-0.5f,0.0f
         };
         ByteBuffer vbb = ByteBuffer.allocate(vertexs.length * 4);//一个byte4个字节
         vbb.order(ByteOrder.nativeOrder());
-        IntBuffer vertexBuffer = vbb.asIntBuffer();
+        FloatBuffer vertexBuffer = vbb.asFloatBuffer();
         vertexBuffer.put(vertexs);
         vertexBuffer.position(0);
-//        Buffer vertexBuffer = vff;
 
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
 
         GLES30.glUseProgram(mProgram);
 
-        GLES30.glVertexAttribPointer(mPositionHandle, vertexCount, GLES30.GL_FIXED, false, 3 * 4, vertexBuffer);
+        GLES30.glVertexAttribPointer(mPositionHandle, vertexCount, GLES30.GL_FLOAT, false, 3 * 4, vertexBuffer);
         GLES30.glEnableVertexAttribArray(mPositionHandle);
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES,0,vertexCount);
