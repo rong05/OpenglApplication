@@ -26,10 +26,6 @@ public class TestRenderer implements GLSurfaceView.Renderer {
         this.mContext = context;
     }
 
-//    private int createProgram(String vertexSource,String fragmentSource){
-//        int vertexShader = ShaderUtils.compileVertexShader(vertexSource);
-//    }
-
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         final String vertexSource = ShaderUtils.loadFromAssets("vertex.vsh",mContext.getResources());
@@ -52,12 +48,12 @@ public class TestRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         final int vertexCount = 3;
-        final float[] vertexs = {
+        final float[] vertexs = new float[]{
                 0.0f,0.5f,0.0f,
                 -0.5f,-0.5f,0.0f,
                 0.5f,-0.5f,0.0f
         };
-        ByteBuffer vbb = ByteBuffer.allocate(vertexs.length * 4);//一个byte4个字节
+        ByteBuffer vbb = ByteBuffer.allocateDirect(vertexs.length * 4);//一个byte4个字节
         vbb.order(ByteOrder.nativeOrder());
         FloatBuffer vertexBuffer = vbb.asFloatBuffer();
         vertexBuffer.put(vertexs);
