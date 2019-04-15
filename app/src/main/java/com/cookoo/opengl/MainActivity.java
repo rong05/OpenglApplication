@@ -38,15 +38,18 @@ public class MainActivity extends Activity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }finally {
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            TextView tv = new TextView(MainActivity.this.getApplicationContext());
-                            setContentView(tv);
-                            String s = "ssdd111";
-                            tv.setText("" + Integer.parseInt(s));
-                        }
-                    }, 1000 * 2);
+                    String s = null;
+                    if( Integer.parseInt(s) == 1){
+                    }
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            TextView tv = new TextView(MainActivity.this.getApplicationContext());
+//                            setContentView(tv);
+//                            String s = "ssdd111";
+//                            tv.setText("" + Integer.parseInt(s));
+//                        }
+//                    }, 1000 * 2);
                 }
             }
         }).start();
