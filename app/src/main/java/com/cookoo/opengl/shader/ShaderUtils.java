@@ -90,30 +90,39 @@ public class ShaderUtils {
     }
 
     public static int createProgram(String vertexSource, String fragmentSource){
+        //创建顶点着色器
         final int vertexShader = loadVertexShader(vertexSource);
         if(vertexShader == GL_ERROR){
             Log.e(TAG, "load vertex shader failed! ");
             return GL_ERROR;
         }
+        //创建片段着色器
         final int fragmentShader = loadFragmentShader(fragmentSource);
         if(fragmentShader == GL_ERROR){
             Log.e(TAG, "load fragment shader failed! ");
             return GL_ERROR;
         }
 
+        //创建着色器程序
         final int program = GLES30.glCreateProgram();
         if (program == GL_ERROR){
             Log.e(TAG, "create program failed! ");
             return GL_ERROR;
         }
 
+        //将编译的着色器对象附加到着色器程序中
         GLES30.glAttachShader(program,vertexShader);
         GLES30.glAttachShader(program,fragmentShader);
 
+        //删除着色器对象
         GLES30.glDeleteShader(vertexShader);
         GLES30.glDeleteShader(fragmentShader);
 
+        //链接着色器程序
         GLES30.glLinkProgram(program);
+
+
+        //检查链接状态
         final int[] linkStatus = new int[1];
         GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0);
         if (linkStatus[0] == GL_ERROR) { // link failed
